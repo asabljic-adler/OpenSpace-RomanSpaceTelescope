@@ -1,0 +1,128 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local l2Kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
+local l2Asset = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local LaunchTime = "2026 AUG 30 12:00:00" -- TBD, no data yet
+local DetachTime = "2026 OCT 30 07:05:26" -- Date from roman.bsp
+local L2orbitInsertionTime = "2026 NOV 30 00:00:00" -- 30-day estimate
+
+local RomanPosition = {
+  Identifier = "RomanPosition",
+  Parent = earthAsset.EarthIAU.Identifier,
+  Transform = {
+    Translation = {
+      Type = "TimelineTranslation",
+      ShouldInterpolate = false,
+      Keyframes = {
+        [LaunchTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.Roman,
+          Observer = coreKernels.ID.Earth,
+          Frame = coreKernels.Frame.Earth
+        },
+        [DetachTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.Roman,
+          Observer = coreKernels.ID.Earth,
+          Frame = coreKernels.Frame.Galactic
+        },
+        [L2orbitInsertionTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.Roman,
+          Observer = l2Kernels.ID.L2,
+          Frame = coreKernels.Frame.Galactic
+        }
+      }
+    }
+  },
+  GUI = {
+    Name = "Roman Position",
+    Path = "/Solar System/Telescopes/Roman",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+local RomanRotation = {
+  Identifier = "RomanRotation",
+  Parent = RomanPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "RomanRotation",
+      XAxis = { -1, 0, 0 },
+      XAxisOrthogonal = true,
+      YAxisInvert = false,
+      YAxis = sunAsset.SolarSystemBarycenter.Identifier
+    }
+  },
+  GUI = {
+    Name = "Roman Rotation",
+    Path = "/Solar System/Telescopes/Roman",
+    Focusable = false,
+    Hidden = true
+  }
+}
+
+
+-- Reparent the RomanPosition node when the data changes
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RomanPosition)
+  openspace.addSceneGraphNode(RomanRotation)
+
+  -- Set correct parent during run-time
+  openspace.scriptScheduler.loadScheduledScript(
+    DetachTime,
+    [[openspace.setParent("RomanPosition", "]] .. earthAsset.EarthCenter.Identifier .. [[")]],
+    [[openspace.setParent("RomanPosition", "]] .. earthAsset.EarthIAU.Identifier .. [[")]],
+    "",
+    1 -- Not default group, never clear this script
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    L2orbitInsertionTime,
+    [[openspace.setParent("RomanPosition", "]] .. l2Asset.L2Position.Identifier .. [[")]],
+    [[openspace.setParent("RomanPosition", "]] .. earthAsset.EarthCenter.Identifier .. [[")]],
+    "",
+    1 -- Not default group, never clear this script
+  )
+
+  -- Set correct parent at the start
+  local now = openspace.time.currentTime()
+  if now < openspace.time.convertTime(DetachTime) then
+    openspace.setParent("RomanPosition", earthAsset.EarthIAU.Identifier)
+  elseif now > openspace.time.convertTime(L2orbitInsertionTime) then
+    openspace.setParent("RomanPosition", l2Asset.L2Position.Identifier)
+  else
+    openspace.setParent("RomanPosition", earthAsset.EarthCenter.Identifier)
+  end
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RomanRotation)
+  openspace.removeSceneGraphNode(RomanPosition)
+  openspace.scriptScheduler.clear(1)
+end)
+
+asset.export("LaunchTime", LaunchTime)
+asset.export("DetachTime", DetachTime)
+asset.export("L2orbitInsertionTime", L2orbitInsertionTime)
+asset.export(RomanPosition)
+asset.export(RomanRotation)
+
+
+
+asset.meta = {
+  Name = "Roman Space Telescope Transforms",
+  Description = [[
+    Roman transforms: Roman position relative to Earth and Roman rotation,
+    a fixed rotation so sunshield always points toward the Sun.
+  ]],
+  Author = "Amir Sabljic, credit to OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

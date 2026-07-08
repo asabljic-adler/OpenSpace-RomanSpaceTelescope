@@ -1,0 +1,55 @@
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local models = asset.resource("data")
+
+
+local RomanModel = {
+  Identifier = "RomanModel",
+  Parent = transforms.RomanRotation.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.LaunchTime
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = asset.enabled,
+    GeometryFile = models .. "/roman.glb",
+    ModelScale = "Centimeter",
+    LightSources = {
+      sunAsset.LightSource
+    },
+    PerformShading = true,
+    EnableFaceCulling = false
+  },
+  GUI = {
+    Name = "Roman Space Telescope Model",
+    Path = "/Solar System/Telescopes/Roman",
+    Description = [[
+      Model of the Roman Space Telescope.
+    ]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RomanModel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RomanModel)
+end)
+
+asset.export(RomanModel)
+
+
+
+asset.meta = {
+  Name = "Roman Space Telescope Model",
+  Description = [[Roman Space Telescope model.]],
+  Author = "Amir Sabljic, credit to OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,197 @@
+local l2Asset = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
+local l2kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
+local earthAsset = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local EndTime = "2032 JAN 28 21:06:24" -- Date from roman.bsp
+
+-- Trail of Roman relative the Earth Inertial for the first 30 minutes after launch
+-- Makes histroy of trail to stay at launch site, that a trail relative to Earth Center won't
+local RomanTrailLaunch = {
+  Identifier = "RomanTrailLaunch",
+  Parent = earthAsset.EarthIAU.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.LaunchTime,
+    End = transforms.DetachTime
+  },
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Roman,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
+    },
+    Color = { 0.1, 0.9, 0.0 },
+    StartTime = transforms.LaunchTime,
+    EndTime = transforms.DetachTime,
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "Roman Launch Trail",
+    Path = "/Solar System/Telescopes/Roman/Trails",
+    Focusable = false,
+    Description = "Roman Space Telescope Launch Trail relative to Earth IAU."
+  }
+}
+
+-- Trail of Roman relative the Earth for the first month after detatching from the rocket
+-- Makes histroy of trail to stay at Earth, that a trail relative to L2 won't
+local RomanTrailCruise = {
+  Identifier = "RomanTrailCruise",
+  Parent = earthAsset.EarthCenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.DetachTime,
+    End = EndTime
+  },
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Roman,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Galactic
+    },
+    Color = { 0.1, 0.9, 0.0 },
+    StartTime = transforms.DetachTime,
+    EndTime = EndTime,
+    SampleInterval = 60 -- Sample rate of once per minute
+  },
+  GUI = {
+    Name = "Roman Cruise Trail",
+    Path = "/Solar System/Telescopes/Roman/Trails",
+    Focusable = false,
+    Description = "Roman Space Telescope Cruise Trail relative to Earth."
+  }
+}
+
+-- Trail of Roman relative to L2 after first month to reach L2
+-- Gives a better trail history of the orbit around L2 than if it was relative to Earth
+-- This does NOT co-rotate with L2 and gives a saddle look of the trail
+local RomanTrailOrbit = {
+  Identifier = "RomanTrailOrbit",
+  Parent = l2Asset.L2Position.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.L2orbitInsertionTime,
+    End = EndTime
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Roman,
+      Observer = l2kernels.ID.L2,
+      Frame = coreKernels.Frame.Galactic
+    },
+    Color = { 0.863, 0.863, 0.863 },
+    Period = 182.621099, -- About 6 months
+    Resolution = 183 -- About a sample rate of once per day
+  },
+  GUI = {
+    Name = "Roman Orbit Trail",
+    Path = "/Solar System/Telescopes/Roman/Trails",
+    Focusable = false,
+    Description = "Roman Space Telescope Orbit Trail relative to L2."
+  }
+}
+
+-- Trail of Roman in orbit around L2 that co-revolves with L2 around the Sun
+-- This gives the trail a look of a wheel going along L2 around the Sun
+local RomanTrailCoRevOrbit = {
+  Identifier = "RomanTrailCoRevOrbit",
+  Parent = l2Asset.L2CoRevFrame.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.L2orbitInsertionTime,
+    End = EndTime
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Roman,
+      Observer = l2kernels.ID.L2,
+      Frame = "L2_COREV"
+    },
+    Color = { 1.0, 0.223, 0.157 },
+    Period = 365.242198, -- About a year, 2 orbits. 1 orbit would be 182.621099 (6 months)
+    Resolution = 365 -- About a sample rate of once per day
+  },
+  GUI = {
+    Name = "Roman L2 Co-revolving Orbit Trail",
+    Path = "/Solar System/Telescopes/Roman/Trails",
+    Focusable = false,
+    Description = "Roman Space Telescope Orbit Trail that Co-revolves with L2."
+  }
+}
+
+local RomanSunTrail = {
+  Identifier = "RomanSunTrail",
+  Parent = sunAsset.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.L2orbitInsertionTime,
+    End = EndTime
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Roman,
+      Observer = coreKernels.ID.SolarSystemBarycenter,
+      Frame = coreKernels.Frame.Galactic
+    },
+    Color = { 0.0, 0.1, 0.9 },
+    Period = 365.242,
+    Resolution = 365 -- About a sample rate of once per day
+  },
+  GUI = {
+    Name = "Roman Sun Trail",
+    Path = "/Solar System/Telescopes/Roman/Trails",
+    Focusable = false,
+    Description = "Roman Space Telescope Trail relative to the Sun."
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RomanTrailLaunch)
+  openspace.addSceneGraphNode(RomanTrailCruise)
+  openspace.addSceneGraphNode(RomanTrailOrbit)
+  openspace.addSceneGraphNode(RomanTrailCoRevOrbit)
+  openspace.addSceneGraphNode(RomanSunTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RomanSunTrail)
+  openspace.removeSceneGraphNode(RomanTrailCoRevOrbit)
+  openspace.removeSceneGraphNode(RomanTrailOrbit)
+  openspace.removeSceneGraphNode(RomanTrailCruise)
+  openspace.removeSceneGraphNode(RomanTrailLaunch)
+end)
+
+asset.export(RomanTrailLaunch)
+asset.export(RomanTrailCruise)
+asset.export(RomanTrailOrbit)
+asset.export(RomanTrailCoRevOrbit)
+asset.export(RomanSunTrail)
+
+
+
+asset.meta = {
+  Name = "Roman Space Telescope Trails",
+  Description = [[
+    Trail of Roman Space Telescope in respect to Earth, L2 and the Sun
+  ]],
+  Author = "Amir Sabljic, credit to OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

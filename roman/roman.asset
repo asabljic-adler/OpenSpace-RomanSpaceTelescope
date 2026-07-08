@@ -1,0 +1,29 @@
+asset.require("./label")
+asset.require("./model")
+
+asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/l2")
+asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/l2sunline")
+
+
+
+asset.onInitialize(function()
+end)
+
+asset.onDeinitialize(function()
+  openspace.scriptScheduler.clear(2)
+end)
+
+
+
+asset.meta = {
+  Name = "Roman Space Telescope",
+  Description = [[
+    This asset adds the content for the Roman Space Telescope mission, including
+    the model, trail, and label.
+    It also includes visuals about the Lagrange point L2, and a line between L2 and the
+    Sun.
+  ]],
+  Author = "Amir Sabljic, credit to OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

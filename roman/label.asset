@@ -1,0 +1,50 @@
+local transforms = asset.require("./transforms")
+
+
+
+local RomanLabel = {
+  Identifier = "RomanLabel",
+  Parent = transforms.RomanPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.LaunchTime
+  },
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "Roman",
+    FontSize = 50,
+    Size = 6.5,
+    MinMaxSize = { 4.0, 30.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
+  },
+  GUI = {
+    Name = "Roman Label",
+    Path = "/Solar System/Telescopes/Roman",
+    Focusable = false,
+    Description = "Main label for the Roman Space Telescope."
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RomanLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(RomanLabel)
+end)
+
+asset.export(RomanLabel)
+
+
+
+asset.meta = {
+  Name = "Roman Label",
+  Description = "Main label for the Roman Space Telescope",
+  Author = "Amir Sabljic, credit to OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}
