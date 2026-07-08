@@ -49,7 +49,7 @@ asset.export(RomanModel)
 asset.meta = {
   Name = "Roman Space Telescope Model",
   Description = [[Roman Space Telescope model.]],
-  Author = "Amir Sabljic, credit to OpenSpace Team",
+  Author = "Amir Sabljic, credit to NASA/Christopher R. Meaney, credit to OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"
 }
