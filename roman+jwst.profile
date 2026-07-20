@@ -79,10 +79,10 @@
     "Sun"
   ],
   "meta": {
-    "author": "OpenSpace Team",
-    "description": "James Webb Space Telescope Profile. Adds the James Webb Space Telescope model with an estimated trajectory.",
+    "author": "Amir Sabljic, OpenSpace Team",
+    "description": "Roman Space Telescope and James Webb Space Telescope Profile. Adds the James Webb Space Telescope model along with the Roman Space Telescope model with an estimated trajectory.",
     "license": "MIT License",
-    "name": "James Webb Space Telescope",
+    "name": "Roman Space Telescope + James Webb Space Telescope",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
